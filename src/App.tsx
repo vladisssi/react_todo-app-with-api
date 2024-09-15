@@ -15,7 +15,7 @@ export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | ''>('');
   const [filterValue, setFilterValue] = useState<Filter>(Filter.All);
-  const [todosInTheBoot, setTodosInTheBoot] = useState<number[]>([]); //to make sure
+  const [loadingTodoIds, setLoadingTodoIds] = useState<number[]>([]);
   const [todoTitle, setTodoTitle] = useState<string>('');
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
@@ -61,7 +61,7 @@ export const App: React.FC = () => {
   }, [todos, filterValue]);
 
   const deleteTodo = (todoId: number) => {
-    setTodosInTheBoot(currentBootTodos => [...currentBootTodos, todoId]);
+    setLoadingTodoIds(currentTodoIds => [...currentTodoIds, todoId]);
 
     return todoService
       .deleteTodo(todoId)
@@ -69,24 +69,21 @@ export const App: React.FC = () => {
         setTodos(currentTodos =>
           currentTodos.filter(todo => todo.id !== todoId),
         );
-        setTodosInTheBoot(currentBootTodos =>
-          currentBootTodos.filter(id => id !== todoId),
+        setLoadingTodoIds(currentTodoIds =>
+          currentTodoIds.filter(id => id !== todoId),
         );
       })
       .catch(() => {
         setErrorMessage(ErrorMessage.DeleteTodoError);
-        setTodosInTheBoot(currentBootTodos =>
-          currentBootTodos.filter(id => id !== todoId),
+        setLoadingTodoIds(currentTodoIds =>
+          currentTodoIds.filter(id => id !== todoId),
         );
         hideAllErrorMessage();
       });
   };
 
   const addTodo = (newTodo: Omit<Todo, 'id'>) => {
-    setTodosInTheBoot(currentBootTodos => [
-      ...currentBootTodos,
-      newTodo.userId,
-    ]);
+    setLoadingTodoIds(currentTodoIds => [...currentTodoIds, newTodo.userId]);
 
     setIsAdding(true);
 
@@ -95,13 +92,13 @@ export const App: React.FC = () => {
       .then(addingTodo => {
         setTodos(currentTodos => [...currentTodos, addingTodo]);
         setTodoTitle('');
-        setTodosInTheBoot(currentBootTodos =>
+        setLoadingTodoIds(currentBootTodos =>
           currentBootTodos.filter(id => id !== newTodo.userId),
         );
       })
       .catch(() => {
         setErrorMessage(ErrorMessage.AddTodoError);
-        setTodosInTheBoot(currentBootTodos =>
+        setLoadingTodoIds(currentBootTodos =>
           currentBootTodos.filter(id => id !== newTodo.userId),
         );
         hideAllErrorMessage();
@@ -125,7 +122,7 @@ export const App: React.FC = () => {
       completed: completed ?? todoForUpdate.completed,
     };
 
-    setTodosInTheBoot(currentBootTodos => [...currentBootTodos, todoId]);
+    setLoadingTodoIds(currentBootTodos => [...currentBootTodos, todoId]);
 
     return todoService
       .updateTodo(todoId, todoUpdate)
@@ -139,7 +136,7 @@ export const App: React.FC = () => {
         hideAllErrorMessage();
       })
       .finally(() => {
-        setTodosInTheBoot(currentBootTodos =>
+        setLoadingTodoIds(currentBootTodos =>
           currentBootTodos.filter(id => id !== todoId),
         );
       });
@@ -189,7 +186,7 @@ export const App: React.FC = () => {
           />
           <TodoList
             todos={filteredTodos}
-            todosBoot={todosInTheBoot}
+            loadingTodoIds={loadingTodoIds}
             deleteTodo={deleteTodo}
             tempTodo={tempTodo}
             updateTodo={updateTodo}

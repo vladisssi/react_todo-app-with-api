@@ -5,7 +5,7 @@ import { TempTodo } from '../TempTodo';
 
 type Props = {
   todos: Todo[];
-  todosBoot: number[];
+  loadingTodoIds: number[];
   deleteTodo: (todoId: number) => void;
   tempTodo: Todo | null;
   updateTodo: (
@@ -17,7 +17,7 @@ type Props = {
 
 export const TodoList: React.FC<Props> = ({
   todos,
-  todosBoot,
+  loadingTodoIds,
   deleteTodo,
   tempTodo,
   updateTodo,
@@ -28,7 +28,7 @@ export const TodoList: React.FC<Props> = ({
         <TodoItem
           todo={todo}
           key={todo.id}
-          todosBoot={todosBoot}
+          loadingTodoIds={loadingTodoIds}
           deleteTodo={deleteTodo}
           updateTodo={updateTodo}
         />

@@ -5,7 +5,7 @@ import { Todo } from '../../types/Todo';
 
 type Props = {
   todo: Todo;
-  todosBoot: number[];
+  loadingTodoIds: number[];
   deleteTodo: (todoId: number) => void;
   updateTodo: (
     todoId: number,
@@ -16,18 +16,18 @@ type Props = {
 
 const TodoItem: React.FC<Props> = ({
   todo,
-  todosBoot,
+  loadingTodoIds,
   deleteTodo,
   updateTodo,
 }) => {
   const { id, title, completed } = todo;
 
-  const [selectTitle, setSelectTitle] = useState<string>(title);
-  const [changeTitle, setChangeTitle] = useState<boolean>(false);
+  const [currentTitle, setCurrentTitle] = useState<string>(title);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
-    setSelectTitle(title);
-    setChangeTitle(false);
+    setCurrentTitle(title);
+    setIsEditing(false);
   }, [title]);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,34 +36,34 @@ const TodoItem: React.FC<Props> = ({
     if (inputRef.current) {
       inputRef.current?.focus();
     }
-  }, [changeTitle]);
+  }, [isEditing]);
 
   const handleChangeTitleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    const newTitle = selectTitle.trim();
+    const newTitle = currentTitle.trim();
 
     if (newTitle === title) {
-      setChangeTitle(false);
+      setIsEditing(false);
 
       return;
     }
 
-    if (newTitle === '') {
+    if (!newTitle) {
       deleteTodo(id);
 
       return;
     }
 
     updateTodo(id, newTitle)?.then(() => {
-      setSelectTitle(newTitle);
+      setCurrentTitle(newTitle);
     });
   };
 
   const handleKeyUp = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
-      setSelectTitle(title);
-      setChangeTitle(false);
+      setCurrentTitle(title);
+      setIsEditing(false);
     }
   };
 
@@ -75,21 +75,21 @@ const TodoItem: React.FC<Props> = ({
           type="checkbox"
           className="todo__status"
           checked={completed}
-          onChange={event => updateTodo(id, selectTitle, event.target.checked)}
+          onChange={event => updateTodo(id, currentTitle, event.target.checked)}
         />
       </label>
 
-      {changeTitle ? (
+      {isEditing ? (
         <form onSubmit={handleChangeTitleSubmit}>
           <input
             type="text"
             data-cy="TodoTitleField"
             className="todo__title-field"
             placeholder="Empty todo will be deleted"
-            value={selectTitle}
+            value={currentTitle}
             onBlur={handleChangeTitleSubmit}
             onKeyUp={handleKeyUp}
-            onChange={event => setSelectTitle(event.target.value)}
+            onChange={event => setCurrentTitle(event.target.value)}
             ref={inputRef}
           />
         </form>
@@ -98,9 +98,9 @@ const TodoItem: React.FC<Props> = ({
           <span
             data-cy="TodoTitle"
             className="todo__title"
-            onDoubleClick={() => setChangeTitle(true)}
+            onDoubleClick={() => setIsEditing(true)}
           >
-            {selectTitle}
+            {currentTitle}
           </span>
 
           <button
@@ -116,7 +116,9 @@ const TodoItem: React.FC<Props> = ({
 
       <div
         data-cy="TodoLoader"
-        className={cn('modal overlay', { 'is-active': todosBoot.includes(id) })}
+        className={cn('modal overlay', {
+          'is-active': loadingTodoIds.includes(id),
+        })}
       >
         <div className="modal-background has-background-white-ter" />
         <div className="loader" />

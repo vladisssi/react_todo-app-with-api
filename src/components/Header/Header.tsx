@@ -31,7 +31,7 @@ export const Header: React.FC<Props> = ({
     setTodoTitle(event.target.value);
   };
 
-  const handleCompleteAll = async () => {
+  const areAllTodosCompleted = async () => {
     const allComplete = todos.every(todo => todo.completed);
     const todosToUpdate = todos.filter(todo => todo.completed !== !allComplete);
 
@@ -47,7 +47,7 @@ export const Header: React.FC<Props> = ({
           type="button"
           className={cn('todoapp__toggle-all', { active: allTodosCompleted })}
           data-cy="ToggleAllButton"
-          onClick={handleCompleteAll}
+          onClick={areAllTodosCompleted}
         />
       )}
 

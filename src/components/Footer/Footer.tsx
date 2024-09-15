@@ -18,34 +18,32 @@ export const Footer: React.FC<Props> = ({
 }) => {
   const isCompleted = todos.some(todo => todo.completed);
 
-  const allNotCompleted = todos.filter(todo => !todo.completed).length;
-
-  const showFilterNavigation = Object.values(Filter).map(value => (
-    <a
-      key={value}
-      href="#/"
-      className={cn('filter__link', { selected: filterValue === value })}
-      data-cy={`FilterLink${value}`}
-      onClick={() => onClickFilter(value)}
-    >
-      {value}
-    </a>
-  ));
+  const activeTodosCount = todos.filter(todo => !todo.completed).length;
 
   const handleDeleteCompleteTodos = () => {
     const allCompletedTodos = todos.filter(todo => todo.completed);
 
-    allCompletedTodos.map(todo => deleteTodo(todo.id));
+    allCompletedTodos.forEach(todo => deleteTodo(todo.id));
   };
 
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
-        {`${allNotCompleted} items left`}
+        {`${activeTodosCount} items left`}
       </span>
 
       <nav className="filter" data-cy="Filter">
-        {showFilterNavigation}
+        {Object.values(Filter).map(value => (
+          <a
+            key={value}
+            href="#/"
+            className={cn('filter__link', { selected: filterValue === value })}
+            data-cy={`FilterLink${value}`}
+            onClick={() => onClickFilter(value)}
+          >
+            {value}
+          </a>
+        ))}
       </nav>
 
       <button
